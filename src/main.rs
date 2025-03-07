@@ -1,8 +1,36 @@
-use rand::seq::index;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use std::collections::HashMap;
+use std::io;
 
 mod test;
 
-fn main() {
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+            .service(echo)
+            .route("/hey", web::get().to(manual_hello))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+}
+
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello world!")
+}
+
+#[post("/echo")]
+async fn echo(req_body: String) -> impl Responder {
+    HttpResponse::Ok().body(req_body)
+}
+
+async fn manual_hello() -> impl Responder {
+    HttpResponse::Ok().body("Hey there!")
+}
+fn learn_rust() {
     let a = 13;
     let b = 2.3;
     let c: f32 = 120.0;
@@ -28,6 +56,45 @@ fn main() {
     println!("the length is {}", length);
 
     chanleng_trim_space();
+
+    //read_out();
+
+    take_control();
+    let mut name = String::from("you");
+    take_control_str(&mut name);
+
+    let mut v1: Vec<i8> = Vec::new();
+    v1.push(50);
+    println!("v1 is {:?}", v1);
+    let v2: Vec<i16> = vec![10, 20, 30];
+    println!("v2 is {:?}", v2);
+    // catch the error with match
+    match v2.get(20) {
+        Some(value) => println!("value is {}", value),
+        None => println!("No value"),
+    }
+    let mut v3: HashMap<&str, i8> = HashMap::new();
+    v3.insert("one", 1);
+    println!("v3 is {:?}", v3);
+    println!("v3[\"one\"] is {:?}", v3.get("one").unwrap());
+
+    let result = devide(20, 2).expect("Cannot divide by zero");
+    println!("result is {:?}", result);
+
+    let res = find_element(vec![10, 20, 30], 20).expect("No value found");
+    println!("option is {:?}", res);
+}
+
+fn find_element(vec: Vec<i32>, value: i32) -> Option<usize> {
+    vec.iter().position(|&x| x == value)
+}
+
+fn devide(a: i32, b: i32) -> Result<i32, String> {
+    if b == 0 {
+        Err(String::from("Cannot divide by zero"))
+    } else {
+        Ok(a / b)
+    }
 }
 
 fn square(x: i32) -> (i32, i32) {
@@ -79,7 +146,7 @@ fn find_max_min() {
     let numbers = [1, 9, -2, 0, 23, 20, -7, 13, 37, 20, 56, -18, 20, 3];
     let mut max: i32 = 0;
     let mut min: i32 = 0;
-    let mut mean: f64;
+    let mean: f64;
     let mut all: i32 = 0;
 
     for &i in numbers.iter() {
@@ -160,4 +227,41 @@ fn trim_spaces(s: &str) -> &str {
     }
 
     &s[start..end]
+}
+
+fn read_out() {
+    println!("enter a number");
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    match input.trim().parse::<i8>() {
+        Ok(num) => println!("You entered: {}", num),
+        Err(_) => println!("That was not a number"),
+    }
+    let mut num: i8 = 20;
+    while num > 0 {
+        println!("Now number is {}", num);
+        num -= 1;
+    }
+}
+
+fn take_control() {
+    let mut x: i8 = 10;
+    let y = x;
+    x = x + 1;
+    println!("x is {}", x);
+    println!("y is {}", y);
+}
+
+fn take_control_str(name: &mut String) {
+    let mut x: String = String::from("hello");
+    let y = x;
+    x = String::from("world1");
+    name.insert_str(1, "WOW");
+
+    println!("new_name is {}", name);
+    println!("x is {}", x);
+    println!("y is {}", y);
 }
